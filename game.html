@@ -165,6 +165,13 @@
     }
     
     /* 响应式 UI */
+    
+    /* PC 端默认 UI 样式 */
+    .bar {
+      height: 100%;
+      transition: width 0.3s;
+    }
+    
     @media (max-width: 768px) {
       #mobileControls {
         display: block;
@@ -941,7 +948,7 @@
         e.preventDefault();
         e.stopPropagation();
         if (window.game) {
-          window.openMenu();
+          window.game.openMenu();
         }
       }, { passive: false, capture: true });
     }
@@ -997,12 +1004,13 @@
     document.addEventListener('contextmenu', (e) => {
       e.preventDefault();
     }, { passive: false });
-    
+
     // 手表端自动瞄准辅助
     if (isWatch && window.game) {
       window.game.autoAimAssist = true;
     }
   </script>
+
 
   <!-- 作弊菜单 -->
   <div id="cheatMenu" style="display: none; position: fixed; top: 10px; left: 10px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 10px; border: 2px solid #ff00ff; z-index: 1000; color: #fff; font-size: 12px;">
@@ -1036,6 +1044,5 @@
       }
     });
   </script>
-
 </body>
 </html>

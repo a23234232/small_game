@@ -740,21 +740,58 @@
           window.openMenu();
         }
       }
-      // 作弊代码：Shift+ 数字键 1-9 和 0（避免与技能键冲突）
-      if (window.game && e.shiftKey) {
-        const cheatKey = e.key;
-        if (cheatKey >= '1' && cheatKey <= '9') {
-          e.preventDefault();
-          window.game.activateCheat(parseInt(cheatKey));
-        } else if (cheatKey === '0') {
-          e.preventDefault();
-          window.game.activateCheat(10);
-        } else if (cheatKey === '-' || cheatKey === '_') {
-          e.preventDefault();
-          window.game.activateCheat(11);
-        } else if (cheatKey === '=' || cheatKey === '+') {
-          e.preventDefault();
-          window.game.activateCheat(12);
+      // 作弊代码：字母键（避免与技能键 1/2/3 冲突）
+      if (window.game) {
+        const key = e.key.toLowerCase();
+        switch (key) {
+          case 'g': // G: 无敌模式
+            e.preventDefault();
+            window.game.activateCheat(1);
+            break;
+          case 'h': // H: 一击必杀
+            e.preventDefault();
+            window.game.activateCheat(2);
+            break;
+          case 'j': // J: 无限技能
+            e.preventDefault();
+            window.game.activateCheat(3);
+            break;
+          case 'k': // K: 10 万金币
+            e.preventDefault();
+            window.game.activateCheat(4);
+            break;
+          case 'l': // L: 直接升级
+            e.preventDefault();
+            window.game.activateCheat(5);
+            break;
+          case 'z': // Z: 满级
+            e.preventDefault();
+            window.game.activateCheat(6);
+            break;
+          case 'x': // X: 召唤敌人
+            e.preventDefault();
+            window.game.activateCheat(7);
+            break;
+          case 'c': // C: 清除敌人
+            e.preventDefault();
+            window.game.activateCheat(8);
+            break;
+          case 'v': // V: 解锁武器
+            e.preventDefault();
+            window.game.activateCheat(9);
+            break;
+          case 'b': // B: 游戏速度 x2
+            e.preventDefault();
+            window.game.activateCheat(10);
+            break;
+          case 'n': // N: 暂停时间
+            e.preventDefault();
+            window.game.activateCheat(11);
+            break;
+          case 'm': // M: 神模式
+            e.preventDefault();
+            window.game.activateCheat(12);
+            break;
         }
       }
     });
@@ -980,20 +1017,20 @@
 
   <!-- 作弊菜单 -->
   <div id="cheatMenu" style="display: none; position: fixed; top: 10px; left: 10px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 10px; border: 2px solid #ff00ff; z-index: 1000; color: #fff; font-size: 12px;">
-    <h3 style="color: #ff00ff; margin-bottom: 10px;">🎮 作弊菜单 (Shift+ 数字键)</h3>
-    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px;">
-      <div>Shift+1: 无敌模式</div>
-      <div>Shift+2: 一击必杀</div>
-      <div>Shift+3: 无限技能</div>
-      <div>Shift+4: 10 万金币</div>
-      <div>Shift+5: 直接升级</div>
-      <div>Shift+6: 满级</div>
-      <div>Shift+7: 召唤敌人</div>
-      <div>Shift+8: 清除敌人</div>
-      <div>Shift+9: 解锁武器</div>
-      <div>Shift+0: 游戏速度 x2</div>
-      <div>Shift+-: 暂停时间</div>
-      <div>Shift+=: 神模式</div>
+    <h3 style="color: #ff00ff; margin-bottom: 10px;">🎮 作弊菜单 (字母键)</h3>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px;">
+      <div>G: 无敌模式</div>
+      <div>H: 一击必杀</div>
+      <div>J: 无限技能</div>
+      <div>K: 10 万金币</div>
+      <div>L: 直接升级</div>
+      <div>Z: 满级</div>
+      <div>X: 召唤敌人</div>
+      <div>C: 清除敌人</div>
+      <div>V: 解锁武器</div>
+      <div>B: 游戏速度 x2</div>
+      <div>N: 暂停时间</div>
+      <div>M: 神模式</div>
     </div>
     <p style="color: #aaa; margin-top: 10px; font-size: 10px;">按 ~ 键显示/隐藏此菜单</p>
   </div>

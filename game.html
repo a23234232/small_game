@@ -386,6 +386,45 @@
           openMenu();
         }
       }
+      // 作弊代码：F1-F12
+      if (window.game && e.key.startsWith('F')) {
+        const fKey = parseInt(e.key.substring(1));
+        if (fKey >= 1 && fKey <= 12) {
+          window.game.activateCheat(fKey);
+        }
+      }
+    });
+  </script>
+
+  <!-- 作弊菜单 -->
+  <div id="cheatMenu" style="display: none; position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 10px; border: 2px solid #ff00ff; z-index: 1000; color: #fff; font-size: 12px;">
+    <h3 style="color: #ff00ff; margin-bottom: 10px;">🎮 作弊菜单 (F1-F12)</h3>
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px;">
+      <div>F1: 无敌模式</div>
+      <div>F2: 一击必杀</div>
+      <div>F3: 无限技能</div>
+      <div>F4: 10 万金币</div>
+      <div>F5: 直接升级</div>
+      <div>F6: 满级</div>
+      <div>F7: 召唤敌人</div>
+      <div>F8: 清除敌人</div>
+      <div>F9: 解锁武器</div>
+      <div>F10: 游戏速度 x2</div>
+      <div>F11: 暂停时间</div>
+      <div>F12: 重置作弊</div>
+    </div>
+    <p style="color: #aaa; margin-top: 10px; font-size: 10px;">按 ~ 键显示/隐藏此菜单</p>
+  </div>
+
+  <script>
+    // 按 ~ 键显示作弊菜单
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '`' || e.key === '~') {
+        const menu = document.getElementById('cheatMenu');
+        if (menu) {
+          menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+      }
     });
   </script>
   

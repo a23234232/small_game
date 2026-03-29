@@ -37,6 +37,7 @@
     #gameCanvas {
       width: 100%;
       height: 100%;
+      object-fit: contain;
       border: 2px solid #4a4a6a;
       border-radius: 8px;
       box-shadow: 0 0 30px rgba(100, 100, 255, 0.3);
@@ -45,7 +46,7 @@
     /* 手机端虚拟摇杆 */
     #mobileControls {
       display: none;
-      position: absolute;
+      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
@@ -56,13 +57,13 @@
     
     /* 虚拟摇杆区域 */
     #joystickZone {
-      position: absolute;
-      bottom: 50px;
-      left: 50px;
-      width: 120px;
-      height: 120px;
-      background: rgba(255, 255, 255, 0.1);
-      border: 2px solid rgba(255, 255, 255, 0.3);
+      position: fixed;
+      bottom: 80px;
+      left: 30px;
+      width: 100px;
+      height: 100px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 3px solid rgba(255, 255, 255, 0.4);
       border-radius: 50%;
       pointer-events: auto;
       touch-action: none;
@@ -72,42 +73,44 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      width: 50px;
-      height: 50px;
-      background: rgba(100, 150, 255, 0.6);
+      width: 45px;
+      height: 45px;
+      background: linear-gradient(135deg, rgba(100, 150, 255, 0.8), rgba(80, 120, 220, 0.9));
       border-radius: 50%;
       transform: translate(-50%, -50%);
-      transition: transform 0.05s;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     }
     
     /* 技能按钮 */
     #mobileSkills {
-      position: absolute;
-      bottom: 40px;
-      right: 40px;
+      position: fixed;
+      bottom: 60px;
+      right: 30px;
       display: flex;
-      gap: 15px;
+      gap: 12px;
       pointer-events: auto;
     }
     
     .mobile-skill-btn {
-      width: 60px;
-      height: 60px;
+      width: 55px;
+      height: 55px;
       border-radius: 50%;
-      background: rgba(0, 0, 0, 0.6);
-      border: 2px solid #666;
+      background: linear-gradient(135deg, rgba(30, 30, 30, 0.8), rgba(50, 50, 50, 0.9));
+      border: 2px solid #888;
       color: #fff;
-      font-size: 20px;
+      font-size: 18px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       position: relative;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
     }
     
     .mobile-skill-btn:active {
-      background: rgba(100, 150, 255, 0.6);
-      transform: scale(0.95);
+      background: linear-gradient(135deg, rgba(100, 150, 255, 0.7), rgba(80, 120, 220, 0.9));
+      border-color: #4488ff;
+      transform: scale(0.92);
     }
     
     .mobile-skill-btn .skill-key {
@@ -120,40 +123,42 @@
     
     /* 射击按钮 */
     #shootBtn {
-      position: absolute;
-      bottom: 120px;
-      right: 50px;
-      width: 70px;
-      height: 70px;
+      position: fixed;
+      bottom: 140px;
+      right: 35px;
+      width: 65px;
+      height: 65px;
       border-radius: 50%;
-      background: rgba(255, 100, 100, 0.6);
-      border: 3px solid rgba(255, 150, 150, 0.8);
+      background: linear-gradient(135deg, rgba(255, 80, 80, 0.7), rgba(220, 60, 60, 0.8));
+      border: 3px solid rgba(255, 150, 150, 0.9);
       color: #fff;
-      font-size: 24px;
+      font-size: 22px;
       pointer-events: auto;
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
     }
     
     #shootBtn:active {
-      background: rgba(255, 150, 150, 0.8);
-      transform: scale(0.95);
+      background: linear-gradient(135deg, rgba(255, 120, 120, 0.8), rgba(255, 80, 80, 0.9));
+      transform: scale(0.92);
     }
     
     /* 菜单按钮 */
     #mobileMenuBtn {
-      position: absolute;
+      position: fixed;
       top: 10px;
       right: 10px;
       padding: 8px 15px;
-      background: rgba(0, 0, 0, 0.6);
-      border: 1px solid #666;
-      border-radius: 5px;
+      background: rgba(0, 0, 0, 0.7);
+      border: 2px solid #666;
+      border-radius: 8px;
       color: #fff;
-      font-size: 14px;
+      font-size: 16px;
       pointer-events: auto;
       z-index: 60;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
     }
     
     /* 响应式 UI */
@@ -162,38 +167,59 @@
         display: block;
       }
       
+      body {
+        overflow: hidden;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+      }
+      
+      #gameContainer {
+        width: 100vw;
+        height: 100vh;
+        max-width: none;
+        max-height: none;
+      }
+      
       #ui {
-        font-size: 11px;
+        font-size: 10px;
         top: 5px;
         left: 5px;
+        z-index: 50;
       }
       
       .bar-container {
-        width: 120px;
-        height: 14px;
+        width: 100px;
+        height: 12px;
       }
       
       #waveInfo {
-        font-size: 13px;
+        font-size: 12px;
         top: 5px;
         right: 5px;
+        z-index: 50;
       }
       
       #skills {
-        display: none; /* 手机端隐藏键盘技能栏 */
+        display: none;
       }
       
       #settings {
         top: 5px;
         left: 50%;
         transform: translateX(-50%);
-        padding: 5px 10px;
-        gap: 8px;
+        padding: 4px 8px;
+        gap: 6px;
+        z-index: 50;
       }
       
       .setting-item {
-        font-size: 10px;
-        padding: 3px 6px;
+        font-size: 9px;
+        padding: 2px 5px;
+      }
+      
+      #menuBtn {
+        display: none;
       }
     }
     }
@@ -584,10 +610,12 @@
     let joystickActive = false;
     let joystickCenter = { x: 0, y: 0 };
     let moveDirection = { x: 0, y: 0 };
+    const maxDist = 30; // 摇杆最大移动距离
     
-    if (joystickZone) {
+    if (joystickZone && joystickKnob) {
       joystickZone.addEventListener('touchstart', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         joystickActive = true;
         const rect = joystickZone.getBoundingClientRect();
         joystickCenter = {
@@ -595,36 +623,47 @@
           y: rect.top + rect.height / 2
         };
         updateJoystick(e.touches[0]);
-      }, { passive: false });
+      }, { passive: false, capture: true });
       
       joystickZone.addEventListener('touchmove', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         if (joystickActive) {
           updateJoystick(e.touches[0]);
         }
-      }, { passive: false });
+      }, { passive: false, capture: true });
       
       joystickZone.addEventListener('touchend', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         joystickActive = false;
         joystickKnob.style.transform = 'translate(-50%, -50%)';
         moveDirection = { x: 0, y: 0 };
         updateMobileInput();
+      }, { passive: false, capture: true });
+      
+      joystickZone.addEventListener('touchcancel', (e) => {
+        e.preventDefault();
+        joystickActive = false;
+        joystickKnob.style.transform = 'translate(-50%, -50%)';
+        moveDirection = { x: 0, y: 0 };
       }, { passive: false });
     }
     
     function updateJoystick(touch) {
-      const maxDist = 35;
       let dx = touch.clientX - joystickCenter.x;
       let dy = touch.clientY - joystickCenter.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
       
+      // 限制移动距离
       if (dist > maxDist) {
-        dx = (dx / dist) * maxDist;
-        dy = (dy / dist) * maxDist;
+        const ratio = maxDist / dist;
+        dx *= ratio;
+        dy *= ratio;
       }
       
-      joystickKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+      // 移动摇杆 knob
+      joystickKnob.style.transform = `translate(calc(-50% + ${dx.toFixed(1)}px), calc(-50% + ${dy.toFixed(1)}px))`;
       
       // 计算移动方向 (-1 到 1)
       moveDirection = {
@@ -637,7 +676,6 @@
     
     function updateMobileInput() {
       if (window.game) {
-        // 模拟 WASD 键
         window.game.mobileMove = moveDirection;
       }
     }
@@ -647,17 +685,23 @@
     if (shootBtn) {
       shootBtn.addEventListener('touchstart', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         if (window.game) {
           window.game.keys.set('mouse', true);
+          window.game.keys.set('space', true);
         }
-      }, { passive: false });
+        shootBtn.style.transform = 'scale(0.92)';
+      }, { passive: false, capture: true });
       
       shootBtn.addEventListener('touchend', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         if (window.game) {
           window.game.keys.set('mouse', false);
+          window.game.keys.set('space', false);
         }
-      }, { passive: false });
+        shootBtn.style.transform = 'scale(1)';
+      }, { passive: false, capture: true });
     }
     
     // 技能按钮
@@ -672,9 +716,16 @@
       if (btn) {
         btn.addEventListener('touchstart', (e) => {
           e.preventDefault();
+          e.stopPropagation();
           if (window.game) {
             window.game.useSkill(index);
           }
+          btn.style.transform = 'scale(0.92)';
+        }, { passive: false, capture: true });
+        
+        btn.addEventListener('touchend', (e) => {
+          e.preventDefault();
+          btn.style.transform = 'scale(1)';
         }, { passive: false });
       }
     }
@@ -684,10 +735,11 @@
     if (mobileMenuBtn) {
       mobileMenuBtn.addEventListener('touchstart', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         if (window.game) {
-          openMenu();
+          window.openMenu();
         }
-      }, { passive: false });
+      }, { passive: false, capture: true });
     }
     
     // 触摸瞄准
@@ -696,16 +748,18 @@
     
     if (gameCanvas) {
       gameCanvas.addEventListener('touchstart', (e) => {
-        if (e.target === joystickZone || e.target === shootBtn) return;
+        if (e.target.closest('#joystickZone') || e.target.closest('#mobileSkills') || 
+            e.target === shootBtn || e.target.closest('#mobileMenuBtn')) return;
         touchAimActive = true;
         updateTouchAim(e.touches[0]);
-      }, { passive: false });
+      }, { passive: false, capture: true });
       
       gameCanvas.addEventListener('touchmove', (e) => {
         if (touchAimActive) {
+          e.preventDefault();
           updateTouchAim(e.touches[0]);
         }
-      }, { passive: false });
+      }, { passive: false, capture: true });
       
       gameCanvas.addEventListener('touchend', (e) => {
         touchAimActive = false;
@@ -713,7 +767,7 @@
     }
     
     function updateTouchAim(touch) {
-      if (window.game) {
+      if (window.game && gameCanvas) {
         const rect = gameCanvas.getBoundingClientRect();
         const scaleX = gameCanvas.width / rect.width;
         const scaleY = gameCanvas.height / rect.height;
@@ -726,7 +780,17 @@
     }
     
     // 防止双击缩放
-    document.addEventListener('dblclick', (e) => {
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', (e) => {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) {
+        e.preventDefault();
+      }
+      lastTouchEnd = now;
+    }, { passive: false });
+    
+    // 防止长按菜单
+    document.addEventListener('contextmenu', (e) => {
       e.preventDefault();
     }, { passive: false });
   </script>

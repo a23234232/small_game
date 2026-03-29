@@ -326,9 +326,16 @@
     </div>
 
     <!-- 游戏菜单 -->
-    <div id="gameMenu" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.95); padding: 30px; border-radius: 15px; text-align: center; color: #fff; border: 2px solid #4488ff; z-index: 100; min-width: 400px;">
+    <div id="gameMenu" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.95); padding: 30px; border-radius: 15px; text-align: center; color: #fff; border: 2px solid #4488ff; z-index: 100; min-width: 500px;">
       <h2 style="color: #4488ff; margin-bottom: 20px;">⚙️ 游戏菜单</h2>
-      
+
+      <!-- 武器选择 -->
+      <div style="margin-bottom: 25px;">
+        <h3 style="color: #aaa; margin-bottom: 10px;">🔫 武器</h3>
+        <div id="weaponSelect" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;"></div>
+        <p id="currentWeapon" style="color: #44ff44; margin-top: 10px; font-size: 16px;"></p>
+      </div>
+
       <!-- 速度调节 -->
       <div style="margin-bottom: 25px;">
         <h3 style="color: #aaa; margin-bottom: 10px;">游戏速度</h3>
@@ -339,15 +346,15 @@
         </div>
         <input type="range" id="speedSlider" min="0.5" max="10" step="0.5" value="1" style="width: 100%; margin-top: 10px;" oninput="setSpeed(this.value)">
       </div>
-      
+
       <!-- 菜单按钮 -->
       <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px;">
         <button onclick="togglePause()" id="pauseBtn" style="background: linear-gradient(90deg, #4488ff, #6688ff); border: none; color: #fff; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 14px;">⏸️ 暂停</button>
         <button onclick="restartGame()" style="background: linear-gradient(90deg, #44ff44, #66ff66); border: none; color: #fff; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 14px;">🔄 重新开始</button>
       </div>
-      
+
       <button onclick="backToLobbyFromGame()" style="background: linear-gradient(90deg, #ff4444, #ff6666); border: none; color: #fff; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-size: 14px; margin-bottom: 15px;">🏠 返回大厅</button>
-      
+
       <button onclick="closeMenu()" style="background: linear-gradient(90deg, #666, #888); border: none; color: #fff; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-size: 14px;">关闭</button>
     </div>
 

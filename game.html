@@ -376,7 +376,7 @@
         gap: 3px !important;
       }
     }
-    }
+    
     .bar {
       height: 100%;
       transition: width 0.3s;
@@ -1002,17 +1002,6 @@
     if (isWatch && window.game) {
       window.game.autoAimAssist = true;
     }
-    
-    // ~ 键切换作弊菜单
-    document.addEventListener('keydown', (e) => {
-      if (e.key === '`' || e.key === '~' || e.key === 'Backquote') {
-        e.preventDefault();
-        const menu = document.getElementById('cheatMenu');
-        if (menu) {
-          menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-        }
-      }
-    });
   </script>
 
   <!-- 作弊菜单 -->
@@ -1034,6 +1023,19 @@
     </div>
     <p style="color: #aaa; margin-top: 10px; font-size: 10px;">按 ~ 键显示/隐藏此菜单</p>
   </div>
+
+  <script>
+    // ~ 键切换作弊菜单
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '`' || e.key === '~' || e.key === 'Backquote') {
+        e.preventDefault();
+        const menu = document.getElementById('cheatMenu');
+        if (menu) {
+          menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+      }
+    });
+  </script>
 
 </body>
 </html>

@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="theme-color" content="#1a1a2e">
+  <title>枪战肉鸽</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔫</text></svg>">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    body {
+      background: #1a1a2e;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: 'Arial', sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+    }
+    #gameContainer {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-width: 960px;
+      max-height: 640px;
+    }
+    #gameCanvas {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border: 2px solid #4a4a6a;
+      border-radius: 8px;
+      box-shadow: 0 0 30px rgba(100, 100, 255, 0.3);
+    }
+    
+    /* 手机端虚拟摇杆 */
+    #mobileControls {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 100;
+    }
+    
+    /* 虚拟摇杆区域 */
+    #joystickZone {
+      position: fixed;
+      bottom: 80px;
+      left: 30px;
+      width: 100px;
+      height: 100px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 3px solid rgba(255, 255, 255, 0.4);
+      border-radius: 50%;
+      pointer-events: auto;
+      touch-action: none;
+    }
+    
+    #joystickKnob {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 45px;
+      height: 45px;
+      background: linear-gradient(135deg, rgba(100, 150, 255, 0.8), rgba(80, 120, 220, 0.9));
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* 技能按钮 */
+    #mobileSkills {
+      position: fixed;
+      bottom: 60px;
+      right: 30px;
+      display: flex;
+      gap: 12px;
+      pointer-events: auto;
+    }
+    
+    .mobile-skill-btn {
+      width: 55px;
+      height: 55px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(30, 30, 30, 0.8), rgba(50, 50, 50, 0.9));
+      border: 2px solid #888;
+      color: #fff;
+      font-size: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+    
+    .mobile-skill-btn:active {
+      background: linear-gradient(135deg, rgba(100, 150, 255, 0.7), rgba(80, 120, 220, 0.9));
+      border-color: #4488ff;
+      transform: scale(0.92);
+    }
+    
+    .mobile-skill-btn .skill-key {
+      font-size: 10px;
+      position: absolute;
+      top: 4px;
+      left: 6px;
+      color: #aaa;
+    }
+    
+    /* 射击按钮 */
+    #shootBtn {
+      position: fixed;
+      bottom: 140px;
+      right: 35px;
+      width: 65px;
+      height: 65px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(255, 80, 80, 0.7), rgba(220, 60, 60, 0.8));
+      border: 3px solid rgba(255, 150, 150, 0.9);
+      color: #fff;
+      font-size: 22px;
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+    }
+    
+    #shootBtn:active {
+      background: linear-gradient(135deg, rgba(255, 120, 120, 0.8), rgba(255, 80, 80, 0.9));
+      transform: scale(0.92);
+    }
+    
+    /* 菜单按钮 */
+    #mobileMenuBtn {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      padding: 8px 15px;
+      background: rgba(0, 0, 0, 0.7);
+      border: 2px solid #666;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 16px;
+      pointer-events: auto;
+      z-index: 60;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+    
+    /* 响应式 UI */
+
+    /* PC 端默认 UI 样式 */
+    #ui {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: #fff;
+      font-size: 14px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+      pointer-events: none;
+      z-index: 50;
+    }
+    #ui div { margin: 5px 0; }
+    
+    .bar-container {
+      width: 200px;
+      height: 20px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 10px;
+      overflow: hidden;
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 10px;
+    }
+    .bar {
+      height: 100%;
+      transition: width 0.3s;
+    }
+    #healthBar { background: linear-gradient(90deg, #ff4444, #ff6666); }
+    #expBar { background: linear-gradient(90deg, #44ff44, #66ff66); }
+
+    @media (max-width: 768px) {
+      #mobileControls {
+        display: block;
+      }
+      
+      body {
+        overflow: hidden;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+      }
+      
+      #gameContainer {
+        width: 100vw;
+        height: 100vh;
+        max-width: none;
+        max-height: none;
+      }
+      
+      #ui {
+        font-size: 10px;
+        top: 5px;
+        left: 5px;
+        z-index: 50;
+      }
+      
+      .bar-container {
+        width: 100px;
+        height: 12px;
+      }
+      
+      #waveInfo {
+        font-size: 12px;
+        top: 5px;
+        right: 5px;
+        z-index: 50;
+      }
+      
+      #skills {
+        display: none;
+      }
+      
+      #settings {
+        top: 5px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 4px 8px;
+        gap: 6px;
+        z-index: 50;
+      }
+      
+      .setting-item {
+        font-size: 9px;
+        padding: 2px 5px;
+      }
+      
+      #menuBtn {
+        display: none;
+      }
+    }
+    
+    /* 手表端超小屏幕优化 */
+    @media (max-width: 400px), (max-height: 400px) {
+      #mobileControls {
+        display: block;
+      }
+      
+      /* 摇杆更大更易操作 */
+      #joystickZone {
+        bottom: 20px !important;
+        left: 10px !important;
+        width: 90px !important;
+        height: 90px !important;
+      }
+      
+      /* 技能按钮简化为 2 个 */
+      #mobileSkills {
+        bottom: 20px !important;
+        right: 10px !important;
+        gap: 8px !important;
+      }
+      
+      .mobile-skill-btn {
+        width: 50px !important;
+        height: 50px !important;
+        font-size: 16px !important;
+      }
+      
+      /* 射击按钮更大 */
+      #shootBtn {
+        bottom: 80px !important;
+        right: 15px !important;
+        width: 60px !important;
+        height: 60px !important;
+        font-size: 20px !important;
+      }
+      
+      /* 简化 UI */
+      #ui {
+        font-size: 8px !important;
+      }
+      
+      .bar-container {
+        width: 70px !important;
+        height: 8px !important;
+      }
+      
+      #waveInfo {
+        font-size: 10px !important;
+      }
+      
+      /* 隐藏不必要的元素 */
+      #settings {
+        display: none;
+      }
+      
+      /* 画布适配 */
+      #gameContainer {
+        width: 100vw !important;
+        height: 100vh !important;
+      }
+      
+      /* 通知简化 */
+      #notification {
+        font-size: 10px !important;
+        padding: 5px 10px !important;
+      }
+      
+      /* 游戏结束界面简化 */
+      #gameOver {
+        padding: 15px !important;
+        max-width: 90% !important;
+      }
+      
+      #gameOver h1 {
+        font-size: 18px !important;
+      }
+      
+      #gameOver p {
+        font-size: 10px !important;
+      }
+      
+      #gameOver button {
+        padding: 8px 15px !important;
+        font-size: 12px !important;
+      }
+      
+      /* 菜单简化 */
+      #gameMenu {
+        max-width: 95% !important;
+        padding: 15px !important;
+      }
+      
+      #weaponSelect {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+      
+      /* 升级界面简化 */
+      #levelUp {
+        max-width: 90% !important;
+        padding: 15px !important;
+      }
+      
+      .upgrade-option {
+        padding: 8px !important;
+        font-size: 10px !important;
+      }
+    }
+    
+    /* 圆形屏幕适配（如 Apple Watch） */
+    @supports (border-radius: 50%) {
+      @media (max-width: 350px) and (max-height: 350px) {
+        /* 圆形布局优化 */
+        #joystickZone {
+          left: 5px !important;
+          bottom: 15px !important;
+        }
+        
+        #mobileSkills {
+          right: 5px !important;
+          bottom: 75px !important;
+          flex-direction: column !important;
+        }
+        
+        #shootBtn {
+          right: 5px !important;
+          bottom: 15px !important;
+        }
+      }
+    }
+    
+    /* 作弊菜单移动端优化 */
+    @media (max-width: 768px) {
+      #cheatMenu {
+        top: auto !important;
+        bottom: 10px !important;
+        left: 10px !important;
+        right: 10px !important;
+        max-width: calc(100% - 20px) !important;
+        font-size: 10px !important;
+        z-index: 2000 !important;
+      }
+      
+      #cheatMenu h3 {
+        font-size: 12px !important;
+      }
+      
+      #cheatMenu > div {
+        gap: 3px !important;
+      }
+    }
+    
+    .bar {
+      height: 100%;
+      transition: width 0.3s;
+    }
+    #healthBar { background: linear-gradient(90deg, #ff4444, #ff6666); }
+    #expBar { background: linear-gradient(90deg, #44ff44, #66ff66); }
+    #waveInfo {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      color: #fff;
+      font-size: 18px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    }
+    #gameOver {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.95);
+      padding: 40px;
+      border-radius: 15px;
+      text-align: center;
+      color: #fff;
+      display: none;
+      border: 2px solid #ff4444;
+      z-index: 100;
+    }
+    #gameOver h1 { color: #ff4444; margin-bottom: 20px; }
+    #gameOver button {
+      background: linear-gradient(90deg, #4444ff, #6666ff);
+      border: none;
+      padding: 15px 40px;
+      color: #fff;
+      font-size: 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    #gameOver button:hover {
+      background: linear-gradient(90deg, #6666ff, #8888ff);
+    }
+    #levelUp {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.95);
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      color: #fff;
+      display: none;
+      border: 2px solid #44ff44;
+      max-width: 500px;
+      z-index: 100;
+    }
+    #levelUp h2 { color: #44ff44; margin-bottom: 20px; }
+    .upgrade-option {
+      background: linear-gradient(90deg, #333355, #444466);
+      border: 1px solid #666688;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .upgrade-option:hover {
+      background: linear-gradient(90deg, #444466, #555577);
+      border-color: #8888aa;
+    }
+    .upgrade-option h3 { color: #66ff66; margin-bottom: 5px; }
+    .upgrade-option p { color: #aaa; font-size: 12px; }
+    .rarity-common { border-left: 4px solid #888888; }
+    .rarity-rare { border-left: 4px solid #4488ff; }
+    .rarity-epic { border-left: 4px solid #aa44ff; }
+    .rarity-legendary { border-left: 4px solid #ffaa00; }
+
+    #skills {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+    }
+    .skill-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 10px;
+      border: 2px solid #666;
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      font-size: 12px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+    .skill-btn:hover { transform: scale(1.1); }
+    .skill-btn:active { transform: scale(0.95); }
+    .skill-btn.disabled { opacity: 0.4; cursor: not-allowed; }
+    .skill-btn .cooldown {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.7);
+      height: 0%;
+      transition: height 0.1s linear;
+    }
+    .skill-key {
+      position: absolute;
+      top: 2px;
+      left: 4px;
+      font-size: 10px;
+      color: #aaa;
+    }
+
+    #settings {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      padding: 10px 20px;
+      border-radius: 20px;
+      display: flex;
+      gap: 15px;
+    }
+    .setting-item {
+      color: #fff;
+      font-size: 12px;
+      cursor: pointer;
+      user-select: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      transition: background 0.2s;
+    }
+    .setting-item:hover { background: rgba(255,255,255,0.1); }
+    .setting-item.active {
+      background: rgba(68, 255, 68, 0.3);
+      color: #44ff44;
+    }
+
+    #startScreen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      z-index: 200;
+    }
+    #startScreen h1 {
+      font-size: 48px;
+      color: #4488ff;
+      margin-bottom: 30px;
+      text-shadow: 0 0 20px rgba(68, 136, 255, 0.5);
+    }
+    #startScreen .controls {
+      background: rgba(255,255,255,0.1);
+      padding: 20px 40px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      text-align: left;
+    }
+    #startScreen .controls p { margin: 8px 0; }
+    #startScreen button {
+      background: linear-gradient(90deg, #4444ff, #6666ff);
+      border: none;
+      padding: 20px 60px;
+      color: #fff;
+      font-size: 24px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    #startScreen button:hover {
+      background: linear-gradient(90deg, #6666ff, #8888ff);
+      transform: scale(1.05);
+    }
+
+    #notification {
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #ffff00;
+      font-size: 24px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 50;
+    }
+  </style>
+  <script type="module" crossorigin src="./assets/game.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/config.js">
+</head>
+<body>
+  <div id="gameContainer">
+    <canvas id="gameCanvas" width="960" height="640"></canvas>
+
+    <div id="settings">
+      <div class="setting-item" id="autoShootSetting">自动射击：关</div>
+      <div class="setting-item" id="autoAimSetting">自动瞄准：关</div>
+      <div class="setting-item" id="enemyHpSetting">血条：开</div>
+      <div class="setting-item" id="friendlyFireSetting">友军伤害：关</div>
+    </div>
+
+    <div id="ui">
+      <div>生命：<div class="bar-container"><div id="healthBar" class="bar" style="width: 100%"></div></div> <span id="healthText">100/100</span></div>
+      <div>经验：<div class="bar-container"><div id="expBar" class="bar" style="width: 0%"></div></div> <span id="expText">0/100</span></div>
+      <div>等级：<span id="levelText">1</span></div>
+      <div>击杀：<span id="killText">0</span></div>
+      <div style="color: #ffaa00;">💰 金币：<span id="goldText">0</span></div>
+      <div style="color: #aa88ff;">🏰 层数：<span id="floorText">1</span></div>
+    </div>
+
+    <div id="waveInfo">
+      <div style="font-size: 18px; margin-bottom: 5px;">波次：<span id="waveText">1</span></div>
+      <div class="bar-container" style="width: 150px; height: 12px;">
+        <div id="waveBar" class="bar" style="width: 0%; background: linear-gradient(90deg, #ffaa00, #ff8800);"></div>
+      </div>
+      <div style="font-size: 11px; color: #aaa; margin-top: 4px;"><span id="waveTimeText">0</span>s / <span id="waveTotalTimeText">30</span>s</div>
+    </div>
+
+    <!-- 菜单按钮 -->
+    <button id="menuBtn" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); border: 1px solid #666; color: #fff; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 14px; z-index: 50;">⚙️ 菜单</button>
+
+    <div id="skills">
+      <button class="skill-btn" id="skill1">
+        <span class="skill-key">1</span>
+        <span class="skill-name">技能</span>
+        <div class="cooldown"></div>
+      </button>
+      <button class="skill-btn" id="skill2">
+        <span class="skill-key">2</span>
+        <span class="skill-name">技能</span>
+        <div class="cooldown"></div>
+      </button>
+      <button class="skill-btn" id="skill3">
+        <span class="skill-key">3</span>
+        <span class="skill-name">技能</span>
+        <div class="cooldown"></div>
+      </button>
+    </div>
+
+    <div id="gameOver">
+      <h1>游戏结束</h1>
+      <p>最终波次：<span id="finalWave">1</span></p>
+      <p>总击杀：<span id="finalKills">0</span></p>
+      <p>等级：<span id="finalLevel">1</span></p>
+      <p style="color: #ffaa00; font-size: 18px;">💰 获得金币：<span id="finalGold">0</span></p>
+      <p style="color: #aaa; font-size: 14px;">总金币：<span id="totalGold">0</span></p>
+      <div style="margin-top: 20px;">
+        <button onclick="showPermanentUpgrades()" style="background: linear-gradient(90deg, #44ff44, #66ff66); margin-right: 10px;">🎯 永久加点</button>
+        <button onclick="restartGame()" style="background: linear-gradient(90deg, #4444ff, #6666ff);">🔄 重新开始</button>
+      </div>
+    </div>
+
+    <!-- 死后加点界面 -->
+    <div id="permanentUpgrade" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.95); padding: 30px; border-radius: 15px; text-align: center; color: #fff; border: 2px solid #ffaa00; z-index: 100; max-width: 600px;">
+      <h2 style="color: #ffaa00; margin-bottom: 10px;">🎯 永久强化</h2>
+      <p style="color: #aaa; margin-bottom: 20px;">花费金币强化你的角色（永久有效）</p>
+      <p style="color: #ffaa00; font-size: 18px; margin-bottom: 20px;">💰 可用金币：<span id="upgradeGold">0</span></p>
+      <div id="permanentOptions" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; text-align: left;"></div>
+      <button onclick="closePermanentUpgrade()" style="margin-top: 20px; background: linear-gradient(90deg, #666, #888); padding: 10px 30px;">完成</button>
+    </div>
+
+    <!-- 游戏菜单 -->
+    <div id="gameMenu" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.95); padding: 30px; border-radius: 15px; text-align: center; color: #fff; border: 2px solid #4488ff; z-index: 100; min-width: 500px;">
+      <h2 style="color: #4488ff; margin-bottom: 20px;">⚙️ 游戏菜单</h2>
+
+      <!-- 武器选择 -->
+      <div style="margin-bottom: 25px;">
+        <h3 style="color: #aaa; margin-bottom: 10px;">🔫 武器</h3>
+        <div id="weaponSelect" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;"></div>
+        <p id="currentWeapon" style="color: #44ff44; margin-top: 10px; font-size: 16px;"></p>
+      </div>
+
+      <!-- 速度调节 -->
+      <div style="margin-bottom: 25px;">
+        <h3 style="color: #aaa; margin-bottom: 10px;">游戏速度</h3>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+          <button onclick="changeSpeed(-0.5)" style="background: #444; border: none; color: #fff; width: 40px; height: 40px; border-radius: 5px; cursor: pointer; font-size: 18px;">-</button>
+          <span id="speedDisplay" style="font-size: 24px; color: #44ff44; min-width: 80px;">1.0x</span>
+          <button onclick="changeSpeed(0.5)" style="background: #444; border: none; color: #fff; width: 40px; height: 40px; border-radius: 5px; cursor: pointer; font-size: 18px;">+</button>
+        </div>
+        <input type="range" id="speedSlider" min="0.5" max="10" step="0.5" value="1" style="width: 100%; margin-top: 10px;" oninput="setSpeed(this.value)">
+      </div>
+
+      <!-- 菜单按钮 -->
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px;">
+        <button onclick="togglePause()" id="pauseBtn" style="background: linear-gradient(90deg, #4488ff, #6688ff); border: none; color: #fff; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 14px;">⏸️ 暂停</button>
+        <button onclick="restartGame()" style="background: linear-gradient(90deg, #44ff44, #66ff66); border: none; color: #fff; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 14px;">🔄 重新开始</button>
+      </div>
+
+      <button onclick="backToLobbyFromGame()" style="background: linear-gradient(90deg, #ff4444, #ff6666); border: none; color: #fff; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-size: 14px; margin-bottom: 15px;">🏠 返回大厅</button>
+
+      <button onclick="closeMenu()" style="background: linear-gradient(90deg, #666, #888); border: none; color: #fff; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-size: 14px;">关闭</button>
+    </div>
+
+    <div id="levelUp">
+      <h2>升级!</h2>
+      <div id="upgradeOptions"></div>
+    </div>
+
+    <div id="startScreen">
+      <h1>🔫 枪战肉鸽</h1>
+      <div class="controls">
+        <p>🎮 WASD / 方向键 - 移动</p>
+        <p>🖱️ 鼠标 - 瞄准</p>
+        <p>🔫 左键 / 空格 - 射击</p>
+        <p>⚡ 1/2/3 - 使用技能</p>
+        <p>⚙️ 顶部可开关自动射击/自动瞄准</p>
+      </div>
+      <button onclick="startGameFromScreen()">开始游戏</button>
+    </div>
+
+    <div id="notification"></div>
+    
+    <!-- 移动端控制 -->
+    <div id="mobileControls">
+      <div id="joystickZone">
+        <div id="joystickKnob"></div>
+      </div>
+      
+      <button id="shootBtn">🔫</button>
+      
+      <div id="mobileSkills">
+        <button class="mobile-skill-btn" id="mskill1">
+          <span class="skill-key">1</span>
+          <span class="skill-name">技能</span>
+        </button>
+        <button class="mobile-skill-btn" id="mskill2">
+          <span class="skill-key">2</span>
+          <span class="skill-name">技能</span>
+        </button>
+        <button class="mobile-skill-btn" id="mskill3">
+          <span class="skill-key">3</span>
+          <span class="skill-name">技能</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <button id="mobileMenuBtn">⚙️</button>
+  
+  <script>
+    // ESC 键打开菜单
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && window.game) {
+        if (window.game.gameState.isRunning && !window.game.gameState.isPaused) {
+          window.openMenu();
+        }
+      }
+      // 作弊代码：字母键（避免与技能键 1/2/3 冲突）
+      if (window.game) {
+        const key = e.key.toLowerCase();
+        switch (key) {
+          case 'g': // G: 无敌模式
+            e.preventDefault();
+            window.game.activateCheat(1);
+            break;
+          case 'h': // H: 一击必杀
+            e.preventDefault();
+            window.game.activateCheat(2);
+            break;
+          case 'j': // J: 无限技能
+            e.preventDefault();
+            window.game.activateCheat(3);
+            break;
+          case 'k': // K: 10 万金币
+            e.preventDefault();
+            window.game.activateCheat(4);
+            break;
+          case 'l': // L: 直接升级
+            e.preventDefault();
+            window.game.activateCheat(5);
+            break;
+          case 'z': // Z: 满级
+            e.preventDefault();
+            window.game.activateCheat(6);
+            break;
+          case 'x': // X: 召唤敌人
+            e.preventDefault();
+            window.game.activateCheat(7);
+            break;
+          case 'c': // C: 清除敌人
+            e.preventDefault();
+            window.game.activateCheat(8);
+            break;
+          case 'v': // V: 解锁武器
+            e.preventDefault();
+            window.game.activateCheat(9);
+            break;
+          case 'b': // B: 游戏速度 x2
+            e.preventDefault();
+            window.game.activateCheat(10);
+            break;
+          case 'n': // N: 暂停时间
+            e.preventDefault();
+            window.game.activateCheat(11);
+            break;
+          case 'm': // M: 神模式
+            e.preventDefault();
+            window.game.activateCheat(12);
+            break;
+        }
+      }
+    });
+  </script>
+  
+  <!-- 移动端触摸控制 -->
+  <script>
+    // 检测设备类型
+    const isWatch = window.innerWidth <= 400 || window.innerHeight <= 400;
+    const isMobile = window.innerWidth <= 768;
+    
+    // 虚拟摇杆控制
+    const joystickZone = document.getElementById('joystickZone');
+    const joystickKnob = document.getElementById('joystickKnob');
+    let joystickActive = false;
+    let joystickCenter = { x: 0, y: 0 };
+    let moveDirection = { x: 0, y: 0 };
+    const maxDist = isWatch ? 25 : 30; // 手表上更小
+    
+    if (joystickZone && joystickKnob) {
+      joystickZone.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        joystickActive = true;
+        const rect = joystickZone.getBoundingClientRect();
+        joystickCenter = {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2
+        };
+        updateJoystick(e.touches[0]);
+      }, { passive: false, capture: true });
+      
+      joystickZone.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (joystickActive) {
+          updateJoystick(e.touches[0]);
+        }
+      }, { passive: false, capture: true });
+      
+      joystickZone.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        joystickActive = false;
+        joystickKnob.style.transform = 'translate(-50%, -50%)';
+        moveDirection = { x: 0, y: 0 };
+        updateMobileInput();
+      }, { passive: false, capture: true });
+      
+      joystickZone.addEventListener('touchcancel', (e) => {
+        e.preventDefault();
+        joystickActive = false;
+        joystickKnob.style.transform = 'translate(-50%, -50%)';
+        moveDirection = { x: 0, y: 0 };
+      }, { passive: false });
+    }
+    
+    function updateJoystick(touch) {
+      let dx = touch.clientX - joystickCenter.x;
+      let dy = touch.clientY - joystickCenter.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      
+      // 限制移动距离
+      if (dist > maxDist) {
+        const ratio = maxDist / dist;
+        dx *= ratio;
+        dy *= ratio;
+      }
+      
+      // 移动摇杆 knob
+      joystickKnob.style.transform = `translate(calc(-50% + ${dx.toFixed(1)}px), calc(-50% + ${dy.toFixed(1)}px))`;
+      
+      // 计算移动方向 (-1 到 1)
+      moveDirection = {
+        x: dx / maxDist,
+        y: dy / maxDist
+      };
+      
+      updateMobileInput();
+    }
+    
+    function updateMobileInput() {
+      if (window.game) {
+        window.game.mobileMove = moveDirection;
+      }
+    }
+    
+    // 射击按钮
+    const shootBtn = document.getElementById('shootBtn');
+    if (shootBtn) {
+      shootBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (window.game) {
+          window.game.keys.set('mouse', true);
+          window.game.keys.set('space', true);
+        }
+        shootBtn.style.transform = 'scale(0.92)';
+      }, { passive: false, capture: true });
+      
+      shootBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (window.game) {
+          window.game.keys.set('mouse', false);
+          window.game.keys.set('space', false);
+        }
+        shootBtn.style.transform = 'scale(1)';
+      }, { passive: false, capture: true });
+    }
+    
+    // 技能按钮（手表上只显示 2 个）
+    const skillBtns = {
+      'mskill1': 0,
+      'mskill2': 1,
+      'mskill3': 2
+    };
+    
+    for (const [id, index] of Object.entries(skillBtns)) {
+      const btn = document.getElementById(id);
+      if (btn) {
+        // 手表上隐藏第 3 个技能
+        if (isWatch && index === 2) {
+          btn.style.display = 'none';
+        }
+        
+        btn.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (window.game) {
+            window.game.useSkill(index);
+          }
+          btn.style.transform = 'scale(0.92)';
+        }, { passive: false, capture: true });
+        
+        btn.addEventListener('touchend', (e) => {
+          e.preventDefault();
+          btn.style.transform = 'scale(1)';
+        }, { passive: false });
+      }
+    }
+    
+    // 菜单按钮
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    if (mobileMenuBtn) {
+      mobileMenuBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (window.game) {
+          window.game.openMenu();
+        }
+      }, { passive: false, capture: true });
+    }
+    
+    // 触摸瞄准（手表上禁用，简化操作）
+    let touchAimActive = false;
+    const gameCanvas = document.getElementById('gameCanvas');
+    
+    if (gameCanvas && !isWatch) {
+      gameCanvas.addEventListener('touchstart', (e) => {
+        if (e.target.closest('#joystickZone') || e.target.closest('#mobileSkills') || 
+            e.target === shootBtn || e.target.closest('#mobileMenuBtn')) return;
+        touchAimActive = true;
+        updateTouchAim(e.touches[0]);
+      }, { passive: false, capture: true });
+      
+      gameCanvas.addEventListener('touchmove', (e) => {
+        if (touchAimActive) {
+          e.preventDefault();
+          updateTouchAim(e.touches[0]);
+        }
+      }, { passive: false, capture: true });
+      
+      gameCanvas.addEventListener('touchend', (e) => {
+        touchAimActive = false;
+      }, { passive: false });
+    }
+    
+    function updateTouchAim(touch) {
+      if (window.game && gameCanvas) {
+        const rect = gameCanvas.getBoundingClientRect();
+        const scaleX = gameCanvas.width / rect.width;
+        const scaleY = gameCanvas.height / rect.height;
+        
+        window.game.mouse = {
+          x: (touch.clientX - rect.left) * scaleX,
+          y: (touch.clientY - rect.top) * scaleY
+        };
+      }
+    }
+    
+    // 防止双击缩放
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', (e) => {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) {
+        e.preventDefault();
+      }
+      lastTouchEnd = now;
+    }, { passive: false });
+    
+    // 防止长按菜单
+    document.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+    }, { passive: false });
+
+    // 手表端自动瞄准辅助
+    if (isWatch && window.game) {
+      window.game.autoAimAssist = true;
+    }
+  </script>
+
+
+  <!-- 作弊菜单 -->
+  <div id="cheatMenu" style="display: none; position: fixed; top: 10px; left: 10px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 10px; border: 2px solid #ff00ff; z-index: 1000; color: #fff; font-size: 12px;">
+    <h3 style="color: #ff00ff; margin-bottom: 10px;">🎮 作弊菜单 (字母键)</h3>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px;">
+      <div>G: 无敌模式</div>
+      <div>H: 一击必杀</div>
+      <div>J: 无限技能</div>
+      <div>K: 10 万金币</div>
+      <div>L: 直接升级</div>
+      <div>Z: 满级</div>
+      <div>X: 召唤敌人</div>
+      <div>C: 清除敌人</div>
+      <div>V: 解锁武器</div>
+      <div>B: 游戏速度 x2</div>
+      <div>N: 暂停时间</div>
+      <div>M: 神模式</div>
+    </div>
+    <p style="color: #aaa; margin-top: 10px; font-size: 10px;">按 ~ 键显示/隐藏此菜单</p>
+  </div>
+
+  <script>
+    // ~ 键切换作弊菜单
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '`' || e.key === '~' || e.key === 'Backquote') {
+        e.preventDefault();
+        const menu = document.getElementById('cheatMenu');
+        if (menu) {
+          menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+      }
+    });
+  </script>
+</body>
+</html>

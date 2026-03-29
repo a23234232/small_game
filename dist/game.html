@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>枪战肉鸽 - 游戏</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #1a1a2e;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: 'Arial', sans-serif;
+      overflow: hidden;
+    }
+    #gameContainer {
+      position: relative;
+    }
+    #gameCanvas {
+      border: 3px solid #4a4a6a;
+      border-radius: 8px;
+      box-shadow: 0 0 30px rgba(100, 100, 255, 0.3);
+    }
+    #ui {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: #fff;
+      font-size: 14px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+      pointer-events: none;
+    }
+    #ui div {
+      margin: 5px 0;
+    }
+    .bar-container {
+      width: 200px;
+      height: 20px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 10px;
+      overflow: hidden;
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 10px;
+    }
+    .bar {
+      height: 100%;
+      transition: width 0.3s;
+    }
+    #healthBar { background: linear-gradient(90deg, #ff4444, #ff6666); }
+    #expBar { background: linear-gradient(90deg, #44ff44, #66ff66); }
+    #waveInfo {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      color: #fff;
+      font-size: 18px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    }
+    #gameOver {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.95);
+      padding: 40px;
+      border-radius: 15px;
+      text-align: center;
+      color: #fff;
+      display: none;
+      border: 2px solid #ff4444;
+      z-index: 100;
+    }
+    #gameOver h1 { color: #ff4444; margin-bottom: 20px; }
+    #gameOver button {
+      background: linear-gradient(90deg, #4444ff, #6666ff);
+      border: none;
+      padding: 15px 40px;
+      color: #fff;
+      font-size: 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    #gameOver button:hover {
+      background: linear-gradient(90deg, #6666ff, #8888ff);
+    }
+    #levelUp {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.95);
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      color: #fff;
+      display: none;
+      border: 2px solid #44ff44;
+      max-width: 500px;
+      z-index: 100;
+    }
+    #levelUp h2 { color: #44ff44; margin-bottom: 20px; }
+    .upgrade-option {
+      background: linear-gradient(90deg, #333355, #444466);
+      border: 1px solid #666688;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .upgrade-option:hover {
+      background: linear-gradient(90deg, #444466, #555577);
+      border-color: #8888aa;
+    }
+    .upgrade-option h3 { color: #66ff66; margin-bottom: 5px; }
+    .upgrade-option p { color: #aaa; font-size: 12px; }
+    .rarity-common { border-left: 4px solid #888888; }
+    .rarity-rare { border-left: 4px solid #4488ff; }
+    .rarity-epic { border-left: 4px solid #aa44ff; }
+    .rarity-legendary { border-left: 4px solid #ffaa00; }
+
+    #skills {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+    }
+    .skill-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 10px;
+      border: 2px solid #666;
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      font-size: 12px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+    .skill-btn:hover { transform: scale(1.1); }
+    .skill-btn:active { transform: scale(0.95); }
+    .skill-btn.disabled { opacity: 0.4; cursor: not-allowed; }
+    .skill-btn .cooldown {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.7);
+      height: 0%;
+      transition: height 0.1s linear;
+    }
+    .skill-key {
+      position: absolute;
+      top: 2px;
+      left: 4px;
+      font-size: 10px;
+      color: #aaa;
+    }
+
+    #settings {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      padding: 10px 20px;
+      border-radius: 20px;
+      display: flex;
+      gap: 15px;
+    }
+    .setting-item {
+      color: #fff;
+      font-size: 12px;
+      cursor: pointer;
+      user-select: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      transition: background 0.2s;
+    }
+    .setting-item:hover { background: rgba(255,255,255,0.1); }
+    .setting-item.active {
+      background: rgba(68, 255, 68, 0.3);
+      color: #44ff44;
+    }
+
+    #startScreen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      z-index: 200;
+    }
+    #startScreen h1 {
+      font-size: 48px;
+      color: #4488ff;
+      margin-bottom: 30px;
+      text-shadow: 0 0 20px rgba(68, 136, 255, 0.5);
+    }
+    #startScreen .controls {
+      background: rgba(255,255,255,0.1);
+      padding: 20px 40px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      text-align: left;
+    }
+    #startScreen .controls p { margin: 8px 0; }
+    #startScreen button {
+      background: linear-gradient(90deg, #4444ff, #6666ff);
+      border: none;
+      padding: 20px 60px;
+      color: #fff;
+      font-size: 24px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    #startScreen button:hover {
+      background: linear-gradient(90deg, #6666ff, #8888ff);
+      transform: scale(1.05);
+    }
+
+    #notification {
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #ffff00;
+      font-size: 24px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 50;
+    }
+  </style>
+  <script type="module" crossorigin src="./assets/game-DLIYcuyN.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/config-DF2WWDFO.js">
+</head>
+<body>
+  <div id="gameContainer">
+    <canvas id="gameCanvas" width="960" height="640"></canvas>
+
+    <div id="settings">
+      <div class="setting-item" id="autoShootSetting">自动射击：关</div>
+      <div class="setting-item" id="autoAimSetting">自动瞄准：关</div>
+      <div class="setting-item" id="enemyHpSetting">血条：开</div>
+      <div class="setting-item" id="friendlyFireSetting">友军伤害：关</div>
+    </div>
+
+    <div id="ui">
+      <div>生命：<div class="bar-container"><div id="healthBar" class="bar" style="width: 100%"></div></div> <span id="healthText">100/100</span></div>
+      <div>经验：<div class="bar-container"><div id="expBar" class="bar" style="width: 0%"></div></div> <span id="expText">0/100</span></div>
+      <div>等级：<span id="levelText">1</span></div>
+      <div>击杀：<span id="killText">0</span></div>
+      <div style="color: #ffaa00;">💰 金币：<span id="goldText">0</span></div>
+      <div style="color: #aa88ff;">🏰 层数：<span id="floorText">1</span></div>
+    </div>
+
+    <div id="waveInfo">
+      <div style="font-size: 18px; margin-bottom: 5px;">波次：<span id="waveText">1</span></div>
+      <div class="bar-container" style="width: 150px; height: 12px;">
+        <div id="waveBar" class="bar" style="width: 0%; background: linear-gradient(90deg, #ffaa00, #ff8800);"></div>
+      </div>
+      <div style="font-size: 11px; color: #aaa; margin-top: 4px;"><span id="waveTimeText">0</span>s / <span id="waveTotalTimeText">30</span>s</div>
+    </div>
+
+    <!-- 菜单按钮 -->
+    <button id="menuBtn" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); border: 1px solid #666; color: #fff; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 14px; z-index: 50;">⚙️ 菜单</button>
+
+    <div id="skills">
+      <button class="skill-btn" id="skill1">
+        <span class="skill-key">1</span>
+        <span class="skill-name">技能</span>
+        <div class="cooldown"></div>
+      </button>
+      <button class="skill-btn" id="skill2">
+        <span class="skill-key">2</span>
+        <span class="skill-name">技能</span>
+        <div class="cooldown"></div>
+      </button>
+      <button class="skill-btn" id="skill3">
+        <span class="skill-key">3</span>
+        <span class="skill-name">技能</span>
+        <div class="cooldown"></div>
+      </button>
+    </div>
+
+    <div id="gameOver">
+      <h1>游戏结束</h1>
+      <p>最终波次：<span id="finalWave">1</span></p>
+      <p>总击杀：<span id="finalKills">0</span></p>
+      <p>等级：<span id="finalLevel">1</span></p>
+      <p style="color: #ffaa00; font-size: 18px;">💰 获得金币：<span id="finalGold">0</span></p>
+      <p style="color: #aaa; font-size: 14px;">总金币：<span id="totalGold">0</span></p>
+      <div style="margin-top: 20px;">
+        <button onclick="showPermanentUpgrades()" style="background: linear-gradient(90deg, #44ff44, #66ff66); margin-right: 10px;">🎯 永久加点</button>
+        <button onclick="restartGame()" style="background: linear-gradient(90deg, #4444ff, #6666ff);">🔄 重新开始</button>
+      </div>
+    </div>
+
+    <!-- 死后加点界面 -->
+    <div id="permanentUpgrade" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.95); padding: 30px; border-radius: 15px; text-align: center; color: #fff; border: 2px solid #ffaa00; z-index: 100; max-width: 600px;">
+      <h2 style="color: #ffaa00; margin-bottom: 10px;">🎯 永久强化</h2>
+      <p style="color: #aaa; margin-bottom: 20px;">花费金币强化你的角色（永久有效）</p>
+      <p style="color: #ffaa00; font-size: 18px; margin-bottom: 20px;">💰 可用金币：<span id="upgradeGold">0</span></p>
+      <div id="permanentOptions" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; text-align: left;"></div>
+      <button onclick="closePermanentUpgrade()" style="margin-top: 20px; background: linear-gradient(90deg, #666, #888); padding: 10px 30px;">完成</button>
+    </div>
+
+    <!-- 游戏菜单 -->
+    <div id="gameMenu" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.95); padding: 30px; border-radius: 15px; text-align: center; color: #fff; border: 2px solid #4488ff; z-index: 100; min-width: 400px;">
+      <h2 style="color: #4488ff; margin-bottom: 20px;">⚙️ 游戏菜单</h2>
+      
+      <!-- 速度调节 -->
+      <div style="margin-bottom: 25px;">
+        <h3 style="color: #aaa; margin-bottom: 10px;">游戏速度</h3>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+          <button onclick="changeSpeed(-0.5)" style="background: #444; border: none; color: #fff; width: 40px; height: 40px; border-radius: 5px; cursor: pointer; font-size: 18px;">-</button>
+          <span id="speedDisplay" style="font-size: 24px; color: #44ff44; min-width: 80px;">1.0x</span>
+          <button onclick="changeSpeed(0.5)" style="background: #444; border: none; color: #fff; width: 40px; height: 40px; border-radius: 5px; cursor: pointer; font-size: 18px;">+</button>
+        </div>
+        <input type="range" id="speedSlider" min="0.5" max="10" step="0.5" value="1" style="width: 100%; margin-top: 10px;" oninput="setSpeed(this.value)">
+      </div>
+      
+      <!-- 菜单按钮 -->
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px;">
+        <button onclick="togglePause()" id="pauseBtn" style="background: linear-gradient(90deg, #4488ff, #6688ff); border: none; color: #fff; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 14px;">⏸️ 暂停</button>
+        <button onclick="restartGame()" style="background: linear-gradient(90deg, #44ff44, #66ff66); border: none; color: #fff; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 14px;">🔄 重新开始</button>
+      </div>
+      
+      <button onclick="backToLobbyFromGame()" style="background: linear-gradient(90deg, #ff4444, #ff6666); border: none; color: #fff; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-size: 14px; margin-bottom: 15px;">🏠 返回大厅</button>
+      
+      <button onclick="closeMenu()" style="background: linear-gradient(90deg, #666, #888); border: none; color: #fff; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-size: 14px;">关闭</button>
+    </div>
+
+    <div id="levelUp">
+      <h2>升级!</h2>
+      <div id="upgradeOptions"></div>
+    </div>
+
+    <div id="startScreen">
+      <h1>🔫 枪战肉鸽</h1>
+      <div class="controls">
+        <p>🎮 WASD / 方向键 - 移动</p>
+        <p>🖱️ 鼠标 - 瞄准</p>
+        <p>🔫 左键 / 空格 - 射击</p>
+        <p>⚡ 1/2/3 - 使用技能</p>
+        <p>⚙️ 顶部可开关自动射击/自动瞄准</p>
+      </div>
+      <button onclick="startGameFromScreen()">开始游戏</button>
+    </div>
+
+    <div id="notification"></div>
+  </div>
+  
+  <script>
+    // ESC 键打开菜单
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && window.game) {
+        if (window.game.gameState.isRunning && !window.game.gameState.isPaused) {
+          openMenu();
+        }
+      }
+    });
+  </script>
+  
+</body>
+</html>

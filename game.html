@@ -222,6 +222,136 @@
         display: none;
       }
     }
+    
+    /* 手表端超小屏幕优化 */
+    @media (max-width: 400px), (max-height: 400px) {
+      #mobileControls {
+        display: block;
+      }
+      
+      /* 摇杆更大更易操作 */
+      #joystickZone {
+        bottom: 20px !important;
+        left: 10px !important;
+        width: 90px !important;
+        height: 90px !important;
+      }
+      
+      /* 技能按钮简化为 2 个 */
+      #mobileSkills {
+        bottom: 20px !important;
+        right: 10px !important;
+        gap: 8px !important;
+      }
+      
+      .mobile-skill-btn {
+        width: 50px !important;
+        height: 50px !important;
+        font-size: 16px !important;
+      }
+      
+      /* 射击按钮更大 */
+      #shootBtn {
+        bottom: 80px !important;
+        right: 15px !important;
+        width: 60px !important;
+        height: 60px !important;
+        font-size: 20px !important;
+      }
+      
+      /* 简化 UI */
+      #ui {
+        font-size: 8px !important;
+      }
+      
+      .bar-container {
+        width: 70px !important;
+        height: 8px !important;
+      }
+      
+      #waveInfo {
+        font-size: 10px !important;
+      }
+      
+      /* 隐藏不必要的元素 */
+      #settings {
+        display: none;
+      }
+      
+      /* 画布适配 */
+      #gameContainer {
+        width: 100vw !important;
+        height: 100vh !important;
+      }
+      
+      /* 通知简化 */
+      #notification {
+        font-size: 10px !important;
+        padding: 5px 10px !important;
+      }
+      
+      /* 游戏结束界面简化 */
+      #gameOver {
+        padding: 15px !important;
+        max-width: 90% !important;
+      }
+      
+      #gameOver h1 {
+        font-size: 18px !important;
+      }
+      
+      #gameOver p {
+        font-size: 10px !important;
+      }
+      
+      #gameOver button {
+        padding: 8px 15px !important;
+        font-size: 12px !important;
+      }
+      
+      /* 菜单简化 */
+      #gameMenu {
+        max-width: 95% !important;
+        padding: 15px !important;
+      }
+      
+      #weaponSelect {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+      
+      /* 升级界面简化 */
+      #levelUp {
+        max-width: 90% !important;
+        padding: 15px !important;
+      }
+      
+      .upgrade-option {
+        padding: 8px !important;
+        font-size: 10px !important;
+      }
+    }
+    
+    /* 圆形屏幕适配（如 Apple Watch） */
+    @supports (border-radius: 50%) {
+      @media (max-width: 350px) and (max-height: 350px) {
+        /* 圆形布局优化 */
+        #joystickZone {
+          left: 5px !important;
+          bottom: 15px !important;
+        }
+        
+        #mobileSkills {
+          right: 5px !important;
+          bottom: 75px !important;
+          flex-direction: column !important;
+        }
+        
+        #shootBtn {
+          right: 5px !important;
+          bottom: 15px !important;
+        }
+      }
+    }
     }
     .bar {
       height: 100%;
@@ -604,13 +734,17 @@
   
   <!-- 移动端触摸控制 -->
   <script>
+    // 检测设备类型
+    const isWatch = window.innerWidth <= 400 || window.innerHeight <= 400;
+    const isMobile = window.innerWidth <= 768;
+    
     // 虚拟摇杆控制
     const joystickZone = document.getElementById('joystickZone');
     const joystickKnob = document.getElementById('joystickKnob');
     let joystickActive = false;
     let joystickCenter = { x: 0, y: 0 };
     let moveDirection = { x: 0, y: 0 };
-    const maxDist = 30; // 摇杆最大移动距离
+    const maxDist = isWatch ? 25 : 30; // 手表上更小
     
     if (joystickZone && joystickKnob) {
       joystickZone.addEventListener('touchstart', (e) => {
@@ -704,7 +838,7 @@
       }, { passive: false, capture: true });
     }
     
-    // 技能按钮
+    // 技能按钮（手表上只显示 2 个）
     const skillBtns = {
       'mskill1': 0,
       'mskill2': 1,
@@ -714,6 +848,11 @@
     for (const [id, index] of Object.entries(skillBtns)) {
       const btn = document.getElementById(id);
       if (btn) {
+        // 手表上隐藏第 3 个技能
+        if (isWatch && index === 2) {
+          btn.style.display = 'none';
+        }
+        
         btn.addEventListener('touchstart', (e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -742,11 +881,11 @@
       }, { passive: false, capture: true });
     }
     
-    // 触摸瞄准
+    // 触摸瞄准（手表上禁用，简化操作）
     let touchAimActive = false;
     const gameCanvas = document.getElementById('gameCanvas');
     
-    if (gameCanvas) {
+    if (gameCanvas && !isWatch) {
       gameCanvas.addEventListener('touchstart', (e) => {
         if (e.target.closest('#joystickZone') || e.target.closest('#mobileSkills') || 
             e.target === shootBtn || e.target.closest('#mobileMenuBtn')) return;
@@ -793,6 +932,11 @@
     document.addEventListener('contextmenu', (e) => {
       e.preventDefault();
     }, { passive: false });
+    
+    // 手表端自动瞄准辅助
+    if (isWatch && window.game) {
+      window.game.autoAimAssist = true;
+    }
   </script>
 
   <!-- 作弊菜单 -->

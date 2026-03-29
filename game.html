@@ -2,13 +2,19 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <title>枪战肉鸽 - 游戏</title>
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
     }
     body {
       background: #1a1a2e;
@@ -18,36 +24,178 @@
       min-height: 100vh;
       font-family: 'Arial', sans-serif;
       overflow: hidden;
+      width: 100vw;
+      height: 100vh;
     }
     #gameContainer {
       position: relative;
+      width: 100%;
+      height: 100%;
+      max-width: 960px;
+      max-height: 640px;
     }
     #gameCanvas {
-      border: 3px solid #4a4a6a;
+      width: 100%;
+      height: 100%;
+      border: 2px solid #4a4a6a;
       border-radius: 8px;
       box-shadow: 0 0 30px rgba(100, 100, 255, 0.3);
     }
-    #ui {
+    
+    /* 手机端虚拟摇杆 */
+    #mobileControls {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 100;
+    }
+    
+    /* 虚拟摇杆区域 */
+    #joystickZone {
+      position: absolute;
+      bottom: 50px;
+      left: 50px;
+      width: 120px;
+      height: 120px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      pointer-events: auto;
+      touch-action: none;
+    }
+    
+    #joystickKnob {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 50px;
+      height: 50px;
+      background: rgba(100, 150, 255, 0.6);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: transform 0.05s;
+    }
+    
+    /* 技能按钮 */
+    #mobileSkills {
+      position: absolute;
+      bottom: 40px;
+      right: 40px;
+      display: flex;
+      gap: 15px;
+      pointer-events: auto;
+    }
+    
+    .mobile-skill-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.6);
+      border: 2px solid #666;
+      color: #fff;
+      font-size: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    
+    .mobile-skill-btn:active {
+      background: rgba(100, 150, 255, 0.6);
+      transform: scale(0.95);
+    }
+    
+    .mobile-skill-btn .skill-key {
+      font-size: 10px;
+      position: absolute;
+      top: 4px;
+      left: 6px;
+      color: #aaa;
+    }
+    
+    /* 射击按钮 */
+    #shootBtn {
+      position: absolute;
+      bottom: 120px;
+      right: 50px;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: rgba(255, 100, 100, 0.6);
+      border: 3px solid rgba(255, 150, 150, 0.8);
+      color: #fff;
+      font-size: 24px;
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    #shootBtn:active {
+      background: rgba(255, 150, 150, 0.8);
+      transform: scale(0.95);
+    }
+    
+    /* 菜单按钮 */
+    #mobileMenuBtn {
       position: absolute;
       top: 10px;
-      left: 10px;
+      right: 10px;
+      padding: 8px 15px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid #666;
+      border-radius: 5px;
       color: #fff;
       font-size: 14px;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-      pointer-events: none;
+      pointer-events: auto;
+      z-index: 60;
     }
-    #ui div {
-      margin: 5px 0;
+    
+    /* 响应式 UI */
+    @media (max-width: 768px) {
+      #mobileControls {
+        display: block;
+      }
+      
+      #ui {
+        font-size: 11px;
+        top: 5px;
+        left: 5px;
+      }
+      
+      .bar-container {
+        width: 120px;
+        height: 14px;
+      }
+      
+      #waveInfo {
+        font-size: 13px;
+        top: 5px;
+        right: 5px;
+      }
+      
+      #skills {
+        display: none; /* 手机端隐藏键盘技能栏 */
+      }
+      
+      #settings {
+        top: 5px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 5px 10px;
+        gap: 8px;
+      }
+      
+      .setting-item {
+        font-size: 10px;
+        padding: 3px 6px;
+      }
     }
-    .bar-container {
-      width: 200px;
-      height: 20px;
-      background: rgba(0,0,0,0.5);
-      border-radius: 10px;
-      overflow: hidden;
-      display: inline-block;
-      vertical-align: middle;
-      margin-left: 10px;
     }
     .bar {
       height: 100%;
@@ -376,7 +524,33 @@
     </div>
 
     <div id="notification"></div>
+    
+    <!-- 移动端控制 -->
+    <div id="mobileControls">
+      <div id="joystickZone">
+        <div id="joystickKnob"></div>
+      </div>
+      
+      <button id="shootBtn">🔫</button>
+      
+      <div id="mobileSkills">
+        <button class="mobile-skill-btn" id="mskill1">
+          <span class="skill-key">1</span>
+          <span class="skill-name">技能</span>
+        </button>
+        <button class="mobile-skill-btn" id="mskill2">
+          <span class="skill-key">2</span>
+          <span class="skill-name">技能</span>
+        </button>
+        <button class="mobile-skill-btn" id="mskill3">
+          <span class="skill-key">3</span>
+          <span class="skill-name">技能</span>
+        </button>
+      </div>
+    </div>
   </div>
+  
+  <button id="mobileMenuBtn">⚙️</button>
   
   <script>
     // ESC 键打开菜单
@@ -400,6 +574,161 @@
         }
       }
     });
+  </script>
+  
+  <!-- 移动端触摸控制 -->
+  <script>
+    // 虚拟摇杆控制
+    const joystickZone = document.getElementById('joystickZone');
+    const joystickKnob = document.getElementById('joystickKnob');
+    let joystickActive = false;
+    let joystickCenter = { x: 0, y: 0 };
+    let moveDirection = { x: 0, y: 0 };
+    
+    if (joystickZone) {
+      joystickZone.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        joystickActive = true;
+        const rect = joystickZone.getBoundingClientRect();
+        joystickCenter = {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2
+        };
+        updateJoystick(e.touches[0]);
+      }, { passive: false });
+      
+      joystickZone.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        if (joystickActive) {
+          updateJoystick(e.touches[0]);
+        }
+      }, { passive: false });
+      
+      joystickZone.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        joystickActive = false;
+        joystickKnob.style.transform = 'translate(-50%, -50%)';
+        moveDirection = { x: 0, y: 0 };
+        updateMobileInput();
+      }, { passive: false });
+    }
+    
+    function updateJoystick(touch) {
+      const maxDist = 35;
+      let dx = touch.clientX - joystickCenter.x;
+      let dy = touch.clientY - joystickCenter.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      
+      if (dist > maxDist) {
+        dx = (dx / dist) * maxDist;
+        dy = (dy / dist) * maxDist;
+      }
+      
+      joystickKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+      
+      // 计算移动方向 (-1 到 1)
+      moveDirection = {
+        x: dx / maxDist,
+        y: dy / maxDist
+      };
+      
+      updateMobileInput();
+    }
+    
+    function updateMobileInput() {
+      if (window.game) {
+        // 模拟 WASD 键
+        window.game.mobileMove = moveDirection;
+      }
+    }
+    
+    // 射击按钮
+    const shootBtn = document.getElementById('shootBtn');
+    if (shootBtn) {
+      shootBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (window.game) {
+          window.game.keys.set('mouse', true);
+        }
+      }, { passive: false });
+      
+      shootBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        if (window.game) {
+          window.game.keys.set('mouse', false);
+        }
+      }, { passive: false });
+    }
+    
+    // 技能按钮
+    const skillBtns = {
+      'mskill1': 0,
+      'mskill2': 1,
+      'mskill3': 2
+    };
+    
+    for (const [id, index] of Object.entries(skillBtns)) {
+      const btn = document.getElementById(id);
+      if (btn) {
+        btn.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          if (window.game) {
+            window.game.useSkill(index);
+          }
+        }, { passive: false });
+      }
+    }
+    
+    // 菜单按钮
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    if (mobileMenuBtn) {
+      mobileMenuBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (window.game) {
+          openMenu();
+        }
+      }, { passive: false });
+    }
+    
+    // 触摸瞄准
+    let touchAimActive = false;
+    const gameCanvas = document.getElementById('gameCanvas');
+    
+    if (gameCanvas) {
+      gameCanvas.addEventListener('touchstart', (e) => {
+        if (e.target === joystickZone || e.target === shootBtn) return;
+        touchAimActive = true;
+        updateTouchAim(e.touches[0]);
+      }, { passive: false });
+      
+      gameCanvas.addEventListener('touchmove', (e) => {
+        if (touchAimActive) {
+          updateTouchAim(e.touches[0]);
+        }
+      }, { passive: false });
+      
+      gameCanvas.addEventListener('touchend', (e) => {
+        touchAimActive = false;
+      }, { passive: false });
+    }
+    
+    function updateTouchAim(touch) {
+      if (window.game) {
+        const rect = gameCanvas.getBoundingClientRect();
+        const scaleX = gameCanvas.width / rect.width;
+        const scaleY = gameCanvas.height / rect.height;
+        
+        window.game.mouse = {
+          x: (touch.clientX - rect.left) * scaleX,
+          y: (touch.clientY - rect.top) * scaleY
+        };
+      }
+    }
+    
+    // 防止双击缩放
+    document.addEventListener('dblclick', (e) => {
+      e.preventDefault();
+    }, { passive: false });
   </script>
 
   <!-- 作弊菜单 -->

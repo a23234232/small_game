@@ -740,12 +740,21 @@
           window.openMenu();
         }
       }
-      // 作弊代码：F1-F12（避免与技能键 1/2/3 冲突）
-      if (window.game && e.key.startsWith('F')) {
-        const fKey = parseInt(e.key.substring(1));
-        if (fKey >= 1 && fKey <= 12) {
+      // 作弊代码：Shift+ 数字键 1-9 和 0（避免与技能键冲突）
+      if (window.game && e.shiftKey) {
+        const cheatKey = e.key;
+        if (cheatKey >= '1' && cheatKey <= '9') {
           e.preventDefault();
-          window.game.activateCheat(fKey);
+          window.game.activateCheat(parseInt(cheatKey));
+        } else if (cheatKey === '0') {
+          e.preventDefault();
+          window.game.activateCheat(10);
+        } else if (cheatKey === '-' || cheatKey === '_') {
+          e.preventDefault();
+          window.game.activateCheat(11);
+        } else if (cheatKey === '=' || cheatKey === '+') {
+          e.preventDefault();
+          window.game.activateCheat(12);
         }
       }
     });
@@ -971,20 +980,20 @@
 
   <!-- 作弊菜单 -->
   <div id="cheatMenu" style="display: none; position: fixed; top: 10px; left: 10px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 10px; border: 2px solid #ff00ff; z-index: 1000; color: #fff; font-size: 12px;">
-    <h3 style="color: #ff00ff; margin-bottom: 10px;">🎮 作弊菜单 (F1-F12)</h3>
+    <h3 style="color: #ff00ff; margin-bottom: 10px;">🎮 作弊菜单 (Shift+ 数字键)</h3>
     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px;">
-      <div>F1: 无敌模式</div>
-      <div>F2: 一击必杀</div>
-      <div>F3: 无限技能</div>
-      <div>F4: 10 万金币</div>
-      <div>F5: 直接升级</div>
-      <div>F6: 满级</div>
-      <div>F7: 召唤敌人</div>
-      <div>F8: 清除敌人</div>
-      <div>F9: 解锁武器</div>
-      <div>F10: 游戏速度 x2</div>
-      <div>F11: 暂停时间</div>
-      <div>F12: 重置作弊</div>
+      <div>Shift+1: 无敌模式</div>
+      <div>Shift+2: 一击必杀</div>
+      <div>Shift+3: 无限技能</div>
+      <div>Shift+4: 10 万金币</div>
+      <div>Shift+5: 直接升级</div>
+      <div>Shift+6: 满级</div>
+      <div>Shift+7: 召唤敌人</div>
+      <div>Shift+8: 清除敌人</div>
+      <div>Shift+9: 解锁武器</div>
+      <div>Shift+0: 游戏速度 x2</div>
+      <div>Shift+-: 暂停时间</div>
+      <div>Shift+=: 神模式</div>
     </div>
     <p style="color: #aaa; margin-top: 10px; font-size: 10px;">按 ~ 键显示/隐藏此菜单</p>
   </div>

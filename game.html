@@ -355,6 +355,27 @@
         }
       }
     }
+    
+    /* 作弊菜单移动端优化 */
+    @media (max-width: 768px) {
+      #cheatMenu {
+        top: auto !important;
+        bottom: 10px !important;
+        left: 10px !important;
+        right: 10px !important;
+        max-width: calc(100% - 20px) !important;
+        font-size: 10px !important;
+        z-index: 2000 !important;
+      }
+      
+      #cheatMenu h3 {
+        font-size: 12px !important;
+      }
+      
+      #cheatMenu > div {
+        gap: 3px !important;
+      }
+    }
     }
     .bar {
       height: 100%;
@@ -940,10 +961,21 @@
     if (isWatch && window.game) {
       window.game.autoAimAssist = true;
     }
+    
+    // ~ 键切换作弊菜单
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '`' || e.key === '~' || e.key === 'Backquote') {
+        e.preventDefault();
+        const menu = document.getElementById('cheatMenu');
+        if (menu) {
+          menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+      }
+    });
   </script>
 
   <!-- 作弊菜单 -->
-  <div id="cheatMenu" style="display: none; position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 10px; border: 2px solid #ff00ff; z-index: 1000; color: #fff; font-size: 12px;">
+  <div id="cheatMenu" style="display: none; position: fixed; top: 10px; left: 10px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 10px; border: 2px solid #ff00ff; z-index: 1000; color: #fff; font-size: 12px;">
     <h3 style="color: #ff00ff; margin-bottom: 10px;">🎮 作弊菜单 (数字键 0-9)</h3>
     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px;">
       <div>0: 无敌模式</div>
@@ -962,17 +994,5 @@
     <p style="color: #aaa; margin-top: 10px; font-size: 10px;">按 ~ 键显示/隐藏此菜单</p>
   </div>
 
-  <script>
-    // 按 ~ 键显示作弊菜单
-    document.addEventListener('keydown', (e) => {
-      if (e.key === '`' || e.key === '~') {
-        const menu = document.getElementById('cheatMenu');
-        if (menu) {
-          menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-        }
-      }
-    });
-  </script>
-  
 </body>
 </html>
